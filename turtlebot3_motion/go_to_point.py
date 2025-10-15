@@ -12,6 +12,7 @@ import time
 class MotionController(Node):
     def __init__(self):
         super().__init__('motion_controller')
+
         # Publishers
         self.publisher_ = self.create_publisher(Twist, '/cmd_vel', 10)
         self.distance_error_pub = self.create_publisher(Float32, '/distance_error', 10)
@@ -47,7 +48,6 @@ class MotionController(Node):
         self.get_logger().info("Choose mode: 1) Go to Point 2) Go to Pose 3) Follow Path")
         self.mode_input()
 
-    # -------------------- User input --------------------
     def mode_input(self):
         choice = input("Enter mode number: ").strip()
         if choice == '1':
@@ -84,14 +84,12 @@ class MotionController(Node):
         self.path_index = 0
         self.goal_x, self.goal_y = self.path_points[self.path_index]
 
-    # -------------------- Odometry callback --------------------
     def odom_callback(self, msg):
         self.x = msg.pose.pose.position.x
         self.y = msg.pose.pose.position.y
         q = msg.pose.pose.orientation
         (_, _, self.theta) = euler_from_quaternion([q.x, q.y, q.z, q.w])
 
-    # -------------------- Control loop --------------------
     def update(self):
         if self.goal_x is None:
             return
@@ -154,7 +152,6 @@ class MotionController(Node):
 
         self.publisher_.publish(msg)
 
-    # -------------------- Stop robot --------------------
     def stop_robot(self):
         stop_msg = Twist()
         stop_msg.linear.x = 0.0
@@ -164,7 +161,7 @@ class MotionController(Node):
             time.sleep(0.1)
         self.get_logger().info("Robot stopped.")
 
-# -------------------- Main --------------------
+
 def main(args=None):
     rclpy.init(args=args)
     node = MotionController()
